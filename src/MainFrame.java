@@ -9,6 +9,11 @@ import java.util.GregorianCalendar;
 public class MainFrame extends JFrame {
     public JPanel contentPane;
 
+    private String getStringNowDate(String format) {
+        SimpleDateFormat formatDate = new SimpleDateFormat(format);
+        return formatDate.format(new GregorianCalendar().getTime());
+    }
+
     public MainFrame() {
         //default properties
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -20,6 +25,7 @@ public class MainFrame extends JFrame {
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
         setContentPane(contentPane);
         setResizable(false);
+        setTitle("Clocks");
         //Labels
         JLabel labelTime = new JLabel();
         Font font = new Font("Times New Roman", Font.PLAIN, 60);
@@ -43,20 +49,13 @@ public class MainFrame extends JFrame {
         Timer timer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                GregorianCalendar nowDate = new GregorianCalendar();
-                SimpleDateFormat formatTime = new SimpleDateFormat("HH:mm:ss");
-                String outTime = formatTime.format(nowDate.getTime());
-                SimpleDateFormat formatDate = new SimpleDateFormat("dd MMMM yyyy");
-                String outDate = formatDate.format(nowDate.getTime());
-                SimpleDateFormat formatDay = new SimpleDateFormat("EEEE");
-                String outDay = formatDay.format(nowDate.getTime());
-                labelTime.setText(outTime);
-                labelDate.setText(outDate);
-                labelDay.setText(outDay);
-
+                labelTime.setText(getStringNowDate("HH:mm:ss"));
+                labelDate.setText(getStringNowDate("dd MMMM yyyy"));
+                labelDay.setText(getStringNowDate("EEEE"));
             }
         });
         timer.start();
+
     }
 
 
