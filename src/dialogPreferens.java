@@ -179,6 +179,7 @@ public class dialogPreferens extends JDialog {
 
         JTextArea areaText = new JTextArea();
         scrollPane.setViewportView(areaText);
+        areaText.setText("It's time!");
         {
             JPanel buttonPane = new JPanel();
             buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
