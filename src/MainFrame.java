@@ -1,9 +1,13 @@
+import javax.sound.sampled.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 public class MainFrame extends JFrame {
@@ -56,9 +60,22 @@ public class MainFrame extends JFrame {
         Timer timer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+        timer.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
                 labelTime.setText(getStringNowDate("HH:mm:ss"));
                 labelDate.setText(getStringNowDate("dd MMMM yyyy"));
                 labelDay.setText(getStringNowDate("EEEE"));
+
+                if (responseTime == null) return;
+                if (responseTime.before(new GregorianCalendar())) {
+                    responseTime = null;
+                    playSoundFromResourse("ding.wav");
+                    JOptionPane.showMessageDialog(MainFrame.this, paramFrame.getMessage(), "ALARM", JOptionPane.INFORMATION_MESSAGE);
+                }
             }
         });
         timer.start();
@@ -71,7 +88,7 @@ public class MainFrame extends JFrame {
 
         ImageIcon imageIcon = new ImageIcon("images/preferencesIcon.png"); // load the image to a imageIcon
         Image image = imageIcon.getImage(); // transform it
-        Image newimg = image.getScaledInstance(25, 25,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
+        Image newimg = image.getScaledInstance(25, 25, java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
         imageIcon = new ImageIcon(newimg);  // transform it back
         preferensButton.setIcon(imageIcon); //add image in button
         preferensButton.addActionListener(new ActionListener() {
@@ -86,6 +103,30 @@ public class MainFrame extends JFrame {
                 preferensButton.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
                         paramFrame.setVisible(true);
+
+                        if (paramFrame.getNotificationType() == dialogPreferens.NotificationType.NONE) {
+                            responseTime = null;
+                            preferensButton.setIcon(new ImageIcon("resources/images/gear.png"));
+                            return;
+                        }
+                        responseTime = new GregorianCalendar();
+                        //alarm
+                        if (paramFrame.getNotificationType() == dialogPreferens.NotificationType.ALARM) {
+                            preferensButton.setIcon(new ImageIcon("resources/images/alarm.png"));
+                            responseTime.set(Calendar.HOUR_OF_DAY, paramFrame.getAlarmHour());
+                            responseTime.set(Calendar.MINUTE, paramFrame.getAlarmMinute());
+                            responseTime.set(Calendar.SECOND, 0);
+
+                            if (responseTime.before(new GregorianCalendar())) {
+                                responseTime.add(Calendar.DAY_OF_MONTH, 1);
+                            }
+                        }
+                        //timer
+                        if (paramFrame.getNotificationType() == dialogPreferens.NotificationType.TIMER) {
+                            preferensButton.setIcon(new ImageIcon("resources/images/timer.png"));
+                            responseTime.add(Calendar.HOUR, paramFrame.getTimerHour());
+                            responseTime.add(Calendar.MINUTE, paramFrame.getTimerMinute());
+                        }
                     }
                 });
 
@@ -93,6 +134,24 @@ public class MainFrame extends JFrame {
         });
 
     }
+
+    public void playSoundFromResourse(String filePath) {
+        String fullFilePath = "resources//sound//" + filePath;
+        try {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File((fullFilePath)));
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioInputStream);
+            clip.start();
+        } catch (UnsupportedAudioFileException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private GregorianCalendar responseTime;
 
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() {
